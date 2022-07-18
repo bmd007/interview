@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 
 public class ScoreKeeperApplication {
 
-    static final ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
-    static final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Score>> scores = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Score>> scores = new ConcurrentHashMap<>();
 
     public static void main(String[] args) throws IOException {
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(8081), 0);
@@ -61,24 +61,30 @@ public class ScoreKeeperApplication {
                             .collect(Collectors.joining(","));
                     exchange.sendResponseHeaders(200, top15Scored.length());
                     exchange.getResponseBody().write(top15Scored.getBytes(StandardCharsets.UTF_8));
+                } else {
+                    String responseBody = "unsupported call";
+                    exchange.sendResponseHeaders(400, responseBody.length());
+                    exchange.getResponseBody().write(responseBody.getBytes(StandardCharsets.UTF_8));
                 }
 
             } catch (AccessDeniedException e) {
                 String responseBody = "Authentication failed, error %s".formatted(e.getMessage());
                 exchange.sendResponseHeaders(403, responseBody.length());
                 exchange.getResponseBody().write(responseBody.getBytes(StandardCharsets.UTF_8));
-                e.printStackTrace();
+            } catch (NumberFormatException e) {
+                String responseBody = "bad request, error %s".formatted(e.getMessage());
+                exchange.sendResponseHeaders(400, responseBody.length());
+                exchange.getResponseBody().write(responseBody.getBytes(StandardCharsets.UTF_8));
             } catch (Exception e) {
                 String responseBody = "unexpected problem, check the path and parameters for request %s, error %s".formatted(exchange, e.getMessage());
                 exchange.sendResponseHeaders(500, responseBody.length());
                 exchange.getResponseBody().write(responseBody.getBytes(StandardCharsets.UTF_8));
-                e.printStackTrace();
+                e.printStackTrace();//todo remove
             } finally {
                 exchange.getResponseBody().close();
             }
         });
         httpServer.start();
-        System.out.println(httpServer.getAddress());
     }
 
     public static Map<String, String> parseQueryParamsToMap(String query) {
@@ -96,5 +102,4 @@ public class ScoreKeeperApplication {
         }
         return queryParams;
     }
-
 }
