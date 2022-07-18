@@ -72,7 +72,7 @@ public class ScoreKeeperApplication {
                 String responseBody = "Authentication failed, error %s".formatted(e.getMessage());
                 exchange.sendResponseHeaders(403, responseBody.length());
                 exchange.getResponseBody().write(responseBody.getBytes(StandardCharsets.UTF_8));
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException | IndexOutOfBoundsException e) {
                 String responseBody = "bad request, error %s".formatted(e.getMessage());
                 exchange.sendResponseHeaders(400, responseBody.length());
                 exchange.getResponseBody().write(responseBody.getBytes(StandardCharsets.UTF_8));
