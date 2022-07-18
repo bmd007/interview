@@ -28,15 +28,16 @@ public class ScoreKeeperApplication {
         httpServer.createContext("/", exchange -> {
             try {
                 String requestPath = exchange.getRequestURI().getPath();
+                String requestMethod = exchange.getRequestMethod();
 
-                if (exchange.getRequestMethod().equals("GET") && requestPath.contains("/login")) {
+                if (requestMethod.equals("GET") && requestPath.contains("/login")) {
                     int userId = Integer.parseInt(requestPath.split("/*/login")[0].split("/")[1]);
                     String sessionId = UUID.randomUUID().toString();
                     sessions.put(sessionId, Session.createNew(sessionId, userId));
                     exchange.sendResponseHeaders(200, sessionId.length());
                     exchange.getResponseBody().write(sessionId.getBytes(StandardCharsets.UTF_8));
 
-                } else if (exchange.getRequestMethod().equals("POST") && requestPath.contains("/score")) {
+                } else if (requestMethod.equals("POST") && requestPath.contains("/score")) {
                     int levelId = Integer.parseInt(requestPath.split("/*/score")[0].split("/")[1]);
                     Integer userId = Optional.ofNullable(parseQueryParamsToMap(exchange.getRequestURI().getQuery()).get("sessionkey"))
                             .map(sessions::get)
@@ -50,7 +51,7 @@ public class ScoreKeeperApplication {
                     scores.put(levelId, levelScoreMap);
                     exchange.sendResponseHeaders(200, 0);
 
-                } else if (exchange.getRequestMethod().equals("GET") && requestPath.contains("/highscorelist")) {
+                } else if (requestMethod.equals("GET") && requestPath.contains("/highscorelist")) {
                     int levelId = Integer.parseInt(requestPath.split("/*/highscorelist")[0].split("/")[1]);//could have used group catching instead
                     String top15Scored = Optional.ofNullable(scores.get(levelId))
                             .stream()
