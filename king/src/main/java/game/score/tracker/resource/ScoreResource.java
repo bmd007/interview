@@ -25,6 +25,18 @@ public class ScoreResource implements HttpHandler {
     public static final Pattern userIdPathVariableInLoginEndpointPattern = Pattern.compile("/(?<userId>\\d+)/login");
     public static final Pattern levelIdPathVariableInScoreEndpointPattern = Pattern.compile("/(?<levelId>\\d+)/score");
     public static final Pattern levelIdPathVariableInHighScoreListEndpointPattern = Pattern.compile("/(?<levelId>\\d+)/highscorelist");
+    
+    private final ScoreRepository scoreRepository;
+    private final SessionRepository sessionRepository;
+
+    public ScoreResource() {
+        scoreRepository = new ScoreRepository();
+        sessionRepository = new SessionRepository();
+    }
+    public ScoreResource(ScoreRepository scoreRepository, SessionRepository sessionRepository) {
+        this.scoreRepository = scoreRepository;
+        this.sessionRepository = sessionRepository;
+    }
 
     public static Map<String, String> queryParamsToMap(String query) {
         if (query == null || query.isBlank()) {
@@ -56,7 +68,7 @@ public class ScoreResource implements HttpHandler {
                 }
                 int userId = Integer.parseInt(matcher.group("userId"));
                 String sessionId = UUID.randomUUID().toString();
-                SessionRepository.SESSION_STORE.put(sessionId, Session.createNew(sessionId, userId));
+                sessionRepository.sessionStore.put(sessionId, Session.createNew(sessionId, userId));
                 exchange.sendResponseHeaders(200, sessionId.length());
                 exchange.getResponseBody().write(sessionId.getBytes(StandardCharsets.UTF_8));
 
@@ -67,12 +79,12 @@ public class ScoreResource implements HttpHandler {
                 }
                 int levelId = Integer.parseInt(matcher.group("levelId"));
                 Integer userId = Optional.ofNullable(queryParamsToMap(exchange.getRequestURI().getQuery()).get("sessionkey"))
-                        .map(SessionRepository.SESSION_STORE::get)
+                        .map(sessionRepository.sessionStore::get)
                         .filter(Session::isValid)
                         .map(Session::userId)
                         .orElseThrow(() -> new AccessDeniedException());
                 int scoreValue = Integer.parseInt(new BufferedReader(new InputStreamReader(exchange.getRequestBody())).readLine());
-                ScoreRepository.setScore(levelId, userId, scoreValue);
+                scoreRepository.setScore(levelId, userId, scoreValue);
                 exchange.sendResponseHeaders(200, 0);
 
             } else if (requestMethod.equals("GET") && requestPath.contains("/highscorelist")) {
@@ -81,7 +93,7 @@ public class ScoreResource implements HttpHandler {
                     throw new IllegalArgumentException("check path variable");
                 }
                 int levelId = Integer.parseInt(matcher.group("levelId"));
-                String top15Scored = ScoreRepository.getTop15ScoresForLevel(levelId)
+                String top15Scored = scoreRepository.getTop15ScoresForLevel(levelId)
                         .map(Score::toCSV)
                         .collect(Collectors.joining(","));
                 exchange.sendResponseHeaders(200, top15Scored.length());

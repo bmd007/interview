@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionRepository {
 
-    public static final ConcurrentHashMap<String, Session> SESSION_STORE = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<String, Session> sessionStore = new ConcurrentHashMap<>();
 
 
 }
