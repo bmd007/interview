@@ -8,5 +8,4 @@ public class SessionRepository {
 
     public final ConcurrentHashMap<String, Session> sessionStore = new ConcurrentHashMap<>();
 
-
 }
