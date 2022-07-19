@@ -24,7 +24,6 @@ public class ScoreRepository {
         return Optional.ofNullable(SCORE_STORE.get(levelId))
                 .stream()
                 .flatMap(levelScoreMap -> levelScoreMap.stream())
-                .sorted()
                 .limit(15);
     }
 
