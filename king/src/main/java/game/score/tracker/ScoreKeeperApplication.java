@@ -15,12 +15,16 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ScoreKeeperApplication {
 
     private static final ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Score>> scores = new ConcurrentHashMap<>();
+    public static final Pattern userIdPathVariableInLoginEndpointPattern = Pattern.compile("/(?<userId>\\d+)/login");
+    public static final Pattern levelIdPathVariableInScoreEndpointPattern = Pattern.compile("/(?<levelId>\\d+)/score");
+    public static final Pattern levelIdPathVariableInHighScoreListEndpointPattern = Pattern.compile("/(?<levelId>\\d+)/highscorelist");
 
     public static void main(String[] args) throws IOException {
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(8081), 0);
@@ -31,14 +35,22 @@ public class ScoreKeeperApplication {
                 String requestMethod = exchange.getRequestMethod();
 
                 if (requestMethod.equals("GET") && requestPath.contains("/login")) {
-                    int userId = Integer.parseInt(requestPath.split("/*/login")[0].split("/")[1]);
+                    var matcher = userIdPathVariableInLoginEndpointPattern.matcher(requestPath);
+                    if (!matcher.matches()){
+                        throw new IllegalArgumentException();
+                    }
+                    int userId = Integer.parseInt(matcher.group("userId"));
                     String sessionId = UUID.randomUUID().toString();
                     sessions.put(sessionId, Session.createNew(sessionId, userId));
                     exchange.sendResponseHeaders(200, sessionId.length());
                     exchange.getResponseBody().write(sessionId.getBytes(StandardCharsets.UTF_8));
 
                 } else if (requestMethod.equals("POST") && requestPath.contains("/score")) {
-                    int levelId = Integer.parseInt(requestPath.split("/*/score")[0].split("/")[1]);
+                    var matcher = levelIdPathVariableInScoreEndpointPattern.matcher(requestPath);
+                    if (!matcher.matches()){
+                        throw new IllegalArgumentException();
+                    }
+                    int levelId = Integer.parseInt(matcher.group("levelId"));
                     Integer userId = Optional.ofNullable(parseQueryParamsToMap(exchange.getRequestURI().getQuery()).get("sessionkey"))
                             .map(sessions::get)
                             .filter(Session::isValid)
@@ -52,7 +64,11 @@ public class ScoreKeeperApplication {
                     exchange.sendResponseHeaders(200, 0);
 
                 } else if (requestMethod.equals("GET") && requestPath.contains("/highscorelist")) {
-                    int levelId = Integer.parseInt(requestPath.split("/*/highscorelist")[0].split("/")[1]);//could have used group catching instead
+                    var matcher = levelIdPathVariableInHighScoreListEndpointPattern.matcher(requestPath);
+                    if (!matcher.matches()){
+                        throw new IllegalArgumentException();
+                    }
+                    int levelId = Integer.parseInt(matcher.group("levelId"));
                     String top15Scored = Optional.ofNullable(scores.get(levelId))
                             .stream()
                             .flatMap(levelScoreMap -> levelScoreMap.values().stream())
@@ -72,7 +88,7 @@ public class ScoreKeeperApplication {
                 String responseBody = "Authentication failed, error %s".formatted(e.getMessage());
                 exchange.sendResponseHeaders(403, responseBody.length());
                 exchange.getResponseBody().write(responseBody.getBytes(StandardCharsets.UTF_8));
-            } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
                 String responseBody = "bad request, error %s".formatted(e.getMessage());
                 exchange.sendResponseHeaders(400, responseBody.length());
                 exchange.getResponseBody().write(responseBody.getBytes(StandardCharsets.UTF_8));
@@ -80,7 +96,6 @@ public class ScoreKeeperApplication {
                 String responseBody = "unexpected problem, check the path and parameters for request %s, error %s".formatted(exchange, e.getMessage());
                 exchange.sendResponseHeaders(500, responseBody.length());
                 exchange.getResponseBody().write(responseBody.getBytes(StandardCharsets.UTF_8));
-                e.printStackTrace();//todo remove
             } finally {
                 exchange.getResponseBody().close();
             }
