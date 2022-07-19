@@ -1,7 +1,7 @@
 package game.score.tracker;
 
 public class AccessDeniedException extends RuntimeException {
-    public AccessDeniedException(){
+    public AccessDeniedException() {
         super("missing (valid) session key");
     }
 }

@@ -5,6 +5,8 @@ import com.sun.net.httpserver.HttpHandler;
 import game.score.tracker.AccessDeniedException;
 import game.score.tracker.domain.Score;
 import game.score.tracker.domain.Session;
+import game.score.tracker.repository.ScoreRepository;
+import game.score.tracker.repository.SessionRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,7 +60,7 @@ public class ScoreResource implements HttpHandler {
                 }
                 int userId = Integer.parseInt(matcher.group("userId"));
                 String sessionId = UUID.randomUUID().toString();
-                SESSION_STORE.put(sessionId, Session.createNew(sessionId, userId));
+                SessionRepository.SESSION_STORE.put(sessionId, Session.createNew(sessionId, userId));
                 exchange.sendResponseHeaders(200, sessionId.length());
                 exchange.getResponseBody().write(sessionId.getBytes(StandardCharsets.UTF_8));
 
@@ -69,15 +71,12 @@ public class ScoreResource implements HttpHandler {
                 }
                 int levelId = Integer.parseInt(matcher.group("levelId"));
                 Integer userId = Optional.ofNullable(queryParamsToMap(exchange.getRequestURI().getQuery()).get("sessionkey"))
-                        .map(SESSION_STORE::get)
+                        .map(SessionRepository.SESSION_STORE::get)
                         .filter(Session::isValid)
                         .map(Session::userId)
                         .orElseThrow(() -> new AccessDeniedException());
                 int scoreValue = Integer.parseInt(new BufferedReader(new InputStreamReader(exchange.getRequestBody())).readLine());
-                var levelScoreMap = Optional.ofNullable(SCORE_STORE.get(levelId))
-                        .orElseGet(() -> new ConcurrentHashMap<>());
-                levelScoreMap.put(userId, new Score(levelId, userId, scoreValue));
-                SCORE_STORE.put(levelId, levelScoreMap);
+                ScoreRepository.setScore(levelId, userId, scoreValue);
                 exchange.sendResponseHeaders(200, 0);
 
             } else if (requestMethod.equals("GET") && requestPath.contains("/highscorelist")) {
@@ -86,11 +85,7 @@ public class ScoreResource implements HttpHandler {
                     throw new IllegalArgumentException("check path variable");
                 }
                 int levelId = Integer.parseInt(matcher.group("levelId"));
-                String top15Scored = Optional.ofNullable(SCORE_STORE.get(levelId))
-                        .stream()
-                        .flatMap(levelScoreMap -> levelScoreMap.values().stream())
-                        .sorted()
-                        .limit(15)
+                String top15Scored = ScoreRepository.getTop15ScoresForLevel(levelId)
                         .map(Score::toCSV)
                         .collect(Collectors.joining(","));
                 exchange.sendResponseHeaders(200, top15Scored.length());
