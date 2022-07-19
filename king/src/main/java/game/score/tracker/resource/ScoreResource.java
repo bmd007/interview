@@ -19,10 +19,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static game.score.tracker.repository.ScoreRepository.SCORE_STORE;
+import static game.score.tracker.repository.SessionRepository.SESSION_STORE;
+
 public class ScoreResource implements HttpHandler {
 
-    private static final ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Score>> scores = new ConcurrentHashMap<>();
     public static final Pattern userIdPathVariableInLoginEndpointPattern = Pattern.compile("/(?<userId>\\d+)/login");
     public static final Pattern levelIdPathVariableInScoreEndpointPattern = Pattern.compile("/(?<levelId>\\d+)/score");
     public static final Pattern levelIdPathVariableInHighScoreListEndpointPattern = Pattern.compile("/(?<levelId>\\d+)/highscorelist");
@@ -57,7 +58,7 @@ public class ScoreResource implements HttpHandler {
                 }
                 int userId = Integer.parseInt(matcher.group("userId"));
                 String sessionId = UUID.randomUUID().toString();
-                sessions.put(sessionId, Session.createNew(sessionId, userId));
+                SESSION_STORE.put(sessionId, Session.createNew(sessionId, userId));
                 exchange.sendResponseHeaders(200, sessionId.length());
                 exchange.getResponseBody().write(sessionId.getBytes(StandardCharsets.UTF_8));
 
@@ -68,15 +69,15 @@ public class ScoreResource implements HttpHandler {
                 }
                 int levelId = Integer.parseInt(matcher.group("levelId"));
                 Integer userId = Optional.ofNullable(queryParamsToMap(exchange.getRequestURI().getQuery()).get("sessionkey"))
-                        .map(sessions::get)
+                        .map(SESSION_STORE::get)
                         .filter(Session::isValid)
                         .map(Session::userId)
                         .orElseThrow(() -> new AccessDeniedException());
                 int scoreValue = Integer.parseInt(new BufferedReader(new InputStreamReader(exchange.getRequestBody())).readLine());
-                var levelScoreMap = Optional.ofNullable(scores.get(levelId))
+                var levelScoreMap = Optional.ofNullable(SCORE_STORE.get(levelId))
                         .orElseGet(() -> new ConcurrentHashMap<>());
                 levelScoreMap.put(userId, new Score(levelId, userId, scoreValue));
-                scores.put(levelId, levelScoreMap);
+                SCORE_STORE.put(levelId, levelScoreMap);
                 exchange.sendResponseHeaders(200, 0);
 
             } else if (requestMethod.equals("GET") && requestPath.contains("/highscorelist")) {
@@ -85,7 +86,7 @@ public class ScoreResource implements HttpHandler {
                     throw new IllegalArgumentException("check path variable");
                 }
                 int levelId = Integer.parseInt(matcher.group("levelId"));
-                String top15Scored = Optional.ofNullable(scores.get(levelId))
+                String top15Scored = Optional.ofNullable(SCORE_STORE.get(levelId))
                         .stream()
                         .flatMap(levelScoreMap -> levelScoreMap.values().stream())
                         .sorted()
