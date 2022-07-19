@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -35,9 +36,10 @@ public class ScoreKeeperApplication {
                 String requestMethod = exchange.getRequestMethod();
 
                 if (requestMethod.equals("GET") && requestPath.contains("/login")) {
-                    var matcher = userIdPathVariableInLoginEndpointPattern.matcher(requestPath);
+
+                    Matcher matcher = userIdPathVariableInLoginEndpointPattern.matcher(requestPath);
                     if (!matcher.matches()){
-                        throw new IllegalArgumentException();
+                        throw new IllegalArgumentException("check path variable");
                     }
                     int userId = Integer.parseInt(matcher.group("userId"));
                     String sessionId = UUID.randomUUID().toString();
@@ -48,10 +50,10 @@ public class ScoreKeeperApplication {
                 } else if (requestMethod.equals("POST") && requestPath.contains("/score")) {
                     var matcher = levelIdPathVariableInScoreEndpointPattern.matcher(requestPath);
                     if (!matcher.matches()){
-                        throw new IllegalArgumentException();
+                        throw new IllegalArgumentException("check path variable");
                     }
                     int levelId = Integer.parseInt(matcher.group("levelId"));
-                    Integer userId = Optional.ofNullable(parseQueryParamsToMap(exchange.getRequestURI().getQuery()).get("sessionkey"))
+                    Integer userId = Optional.ofNullable(queryParamsToMap(exchange.getRequestURI().getQuery()).get("sessionkey"))
                             .map(sessions::get)
                             .filter(Session::isValid)
                             .map(Session::userId)
@@ -66,7 +68,7 @@ public class ScoreKeeperApplication {
                 } else if (requestMethod.equals("GET") && requestPath.contains("/highscorelist")) {
                     var matcher = levelIdPathVariableInHighScoreListEndpointPattern.matcher(requestPath);
                     if (!matcher.matches()){
-                        throw new IllegalArgumentException();
+                        throw new IllegalArgumentException("check path variable");
                     }
                     int levelId = Integer.parseInt(matcher.group("levelId"));
                     String top15Scored = Optional.ofNullable(scores.get(levelId))
@@ -79,9 +81,7 @@ public class ScoreKeeperApplication {
                     exchange.sendResponseHeaders(200, top15Scored.length());
                     exchange.getResponseBody().write(top15Scored.getBytes(StandardCharsets.UTF_8));
                 } else {
-                    String responseBody = "unsupported call";
-                    exchange.sendResponseHeaders(400, responseBody.length());
-                    exchange.getResponseBody().write(responseBody.getBytes(StandardCharsets.UTF_8));
+                    throw new IllegalArgumentException("unsupported call");
                 }
 
             } catch (AccessDeniedException e) {
@@ -103,7 +103,7 @@ public class ScoreKeeperApplication {
         httpServer.start();
     }
 
-    public static Map<String, String> parseQueryParamsToMap(String query) {
+    public static Map<String, String> queryParamsToMap(String query) {
         if (query == null || query.isBlank()) {
             return Map.of();
         }
