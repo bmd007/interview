@@ -16,13 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static game.score.tracker.repository.ScoreRepository.SCORE_STORE;
-import static game.score.tracker.repository.SessionRepository.SESSION_STORE;
 
 public class ScoreResource implements HttpHandler {
 

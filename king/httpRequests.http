@@ -2,7 +2,7 @@
 GET http://localhost:8081/1234/login
 
 ### notify score
-POST http://localhost:8081/2/score?sessionkey=ab0dce16-30d2-4fdf-8081-6a184303837e
+POST http://localhost:8081/2/score?sessionkey=5ce300a2-6fc6-4b7f-a58c-ca6d6abc3972
 Content-Type: text/plain
 
 123002
