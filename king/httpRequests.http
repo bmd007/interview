@@ -1,0 +1,11 @@
+### login
+GET http://localhost:8081/123/login
+
+### notify score
+POST http://localhost:8081/2/score?sessionkey=a2565f60-363d-404c-917b-35dbe4f1c395
+Content-Type: text/plain
+
+12300
+
+### leaderboard
+GET http://localhost:8081/2/highscorelist
