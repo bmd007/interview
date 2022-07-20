@@ -20,6 +20,10 @@ public class ScoreRepository {
         scoreStore.put(levelId, levelScoreSet);
     }
 
+    public void setScore(Score score){
+        setScore(score.levelId(), score.userId(), score.value());
+    }
+
     public Stream<Score> getTop15ScoresForLevel(int levelId){
         return Optional.ofNullable(scoreStore.get(levelId))
                 .stream()
