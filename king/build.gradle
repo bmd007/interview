@@ -39,3 +39,11 @@ testing {
 application {
     mainClass = 'game.score.tracker.ScoreKeeperApplication'
 }
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'game.score.tracker.ScoreKeeperApplication'
+        )
+    }
+}
