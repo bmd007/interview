@@ -2,6 +2,8 @@ package game.score.tracker.repository;
 
 import game.score.tracker.domain.Score;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,7 +11,7 @@ import java.util.stream.Stream;
 
 public class ScoreRepository {
 
-    private final ConcurrentHashMap<Integer, TreeSet<Score>> scoreStore = new ConcurrentHashMap<>();
+    private final Map<Integer, TreeSet<Score>> scoreStore = new HashMap<>();
 
     public synchronized void setScore(int levelId, int userId, int scoreValue){
         TreeSet<Score> levelScoreSet = Optional.ofNullable(scoreStore.get(levelId))
