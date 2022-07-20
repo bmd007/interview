@@ -1,5 +1,5 @@
 ## KING
-### SCORE KEEPER 
+### GAME SCORE TRACKER 
 
 ### main points:
     * need for a thread safe data structure
