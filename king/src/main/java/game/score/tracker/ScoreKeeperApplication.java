@@ -15,5 +15,4 @@ public class ScoreKeeperApplication {
         httpServer.createContext("/", new ScoreResource());
         httpServer.start();
     }
-
 }

@@ -2,7 +2,7 @@ package game.score.tracker.resource;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import game.score.tracker.AccessDeniedException;
+import game.score.tracker.exception.AccessDeniedException;
 import game.score.tracker.domain.Score;
 import game.score.tracker.domain.Session;
 import game.score.tracker.repository.ScoreRepository;
@@ -69,6 +69,7 @@ public class ScoreResource implements HttpHandler {
                 int userId = Integer.parseInt(matcher.group("userId"));
                 String sessionId = UUID.randomUUID().toString();
                 sessionRepository.sessionStore.put(sessionId, Session.createNew(sessionId, userId));
+                exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
                 exchange.sendResponseHeaders(200, sessionId.length());
                 exchange.getResponseBody().write(sessionId.getBytes(StandardCharsets.UTF_8));
 
@@ -85,7 +86,7 @@ public class ScoreResource implements HttpHandler {
                         .orElseThrow(() -> new AccessDeniedException());
                 int scoreValue = Integer.parseInt(new BufferedReader(new InputStreamReader(exchange.getRequestBody())).readLine());
                 scoreRepository.setScore(levelId, userId, scoreValue);
-                exchange.sendResponseHeaders(200, 0);
+                exchange.sendResponseHeaders(204, 0);
 
             } else if (requestMethod.equals("GET") && requestPath.contains("/highscorelist")) {
                 var matcher = levelIdPathVariableInHighScoreListEndpointPattern.matcher(requestPath);
@@ -96,6 +97,7 @@ public class ScoreResource implements HttpHandler {
                 String top15Scored = scoreRepository.getTop15ScoresForLevel(levelId)
                         .map(Score::toCSV)
                         .collect(Collectors.joining(","));
+                exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
                 exchange.sendResponseHeaders(200, top15Scored.length());
                 exchange.getResponseBody().write(top15Scored.getBytes(StandardCharsets.UTF_8));
             } else {

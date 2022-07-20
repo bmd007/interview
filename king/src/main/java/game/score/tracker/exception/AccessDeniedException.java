@@ -1,4 +1,4 @@
-package game.score.tracker;
+package game.score.tracker.exception;
 
 public class AccessDeniedException extends RuntimeException {
     public AccessDeniedException() {
