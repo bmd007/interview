@@ -86,7 +86,7 @@ public class ScoreResource implements HttpHandler {
                         .orElseThrow(() -> new AccessDeniedException());
                 int scoreValue = Integer.parseInt(new BufferedReader(new InputStreamReader(exchange.getRequestBody())).readLine());
                 scoreRepository.setScore(levelId, userId, scoreValue);
-                exchange.sendResponseHeaders(204, 0);
+                exchange.sendResponseHeaders(204, -1);
 
             } else if (requestMethod.equals("GET") && requestPath.contains("/highscorelist")) {
                 var matcher = levelIdPathVariableInHighScoreListEndpointPattern.matcher(requestPath);
