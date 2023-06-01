@@ -8,13 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class SmoothieMachine {
-    static Map menu = new HashMap<String, List<String>>() {{
-        put("Just Desserts", Arrays.asList("peanut", "banana", "ice cream", "chocolate", "cherry"));
-        put("Classic", Arrays.asList("strawberry", "banana", "pineapple", "mango", "peach", "honey", "ice", "yogurt"));
-        put("Forest Berry", Arrays.asList("strawberry", "raspberry", "blueberry", "honey", "ice", "yogurt"));
-        put("Freezie", Arrays.asList("blackberry", "blueberry", "black currant", "grape juice", "frozen yogurt"));
-        put("Greenie", Arrays.asList("green apple", "kiwi", "lime", "avocado", "spinach", "ice", "apple juice"));
-        put("Vegan Delite", Arrays.asList("strawberry", "passion fruit", "pineapple", "mango", "peach", "ice", "soy " + "milk"));
+    static Map menu = new HashMap<String, Set<String>>() {{
+        put("Just Desserts", Set.of("peanut", "banana", "ice cream", "chocolate", "cherry"));
+        put("Classic", Set.of("strawberry", "banana", "pineapple", "mango", "peach", "honey", "ice", "yogurt"));
+        put("Forest Berry", Set.of("strawberry", "raspberry", "blueberry", "honey", "ice", "yogurt"));
+        put("Freezie", Set.of("blackberry", "blueberry", "black currant", "grape juice", "frozen yogurt"));
+        put("Greenie", Set.of("green apple", "kiwi", "lime", "avocado", "spinach", "ice", "apple juice"));
+        put("Vegan Delite", Set.of("strawberry", "passion fruit", "pineapple", "mango", "peach", "ice", "soy " + "milk"));
     }};
 
     public static String ingredients(String order) {
@@ -22,7 +22,8 @@ public class SmoothieMachine {
             throw new IllegalArgumentException("order can not be empty");
         }
         String[] orderParts = order.split(",");
-        ArrayList<String> ingredients = Optional.ofNullable((List<String>) menu.get(orderParts[0]))
+        String receipeName = orderParts[0];
+        ArrayList<String> ingredients = Optional.ofNullable(menu.get(receipeName))
                 .map(ArrayList::new)
                 .orElseThrow(() -> new IllegalArgumentException("order contains a non existing smoothie"));
         for (int i = 1; i < orderParts.length; i++) {
