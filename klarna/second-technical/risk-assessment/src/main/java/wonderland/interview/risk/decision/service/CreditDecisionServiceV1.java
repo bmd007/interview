@@ -3,7 +3,6 @@ package wonderland.interview.risk.decision.service;
 import com.google.common.base.Strings;
 import wonderland.interview.risk.decision.api.CreditRequestDecisionV1;
 import wonderland.interview.risk.decision.api.CreditRequestV1;
-import wonderland.interview.risk.decision.api.TransactionHistoryV1;
 import wonderland.interview.risk.decision.domain.CreditDecision;
 import wonderland.interview.risk.decision.domain.CreditDecisionMaker;
 import wonderland.interview.risk.decision.domain.CreditHistoryRepositoryImpl;

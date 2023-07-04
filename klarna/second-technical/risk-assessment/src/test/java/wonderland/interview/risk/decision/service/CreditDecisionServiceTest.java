@@ -4,6 +4,7 @@ import wonderland.interview.risk.decision.api.CreditRequestDecisionV1;
 import wonderland.interview.risk.decision.api.CreditRequestV1;
 import wonderland.interview.risk.decision.domain.CreditDecision;
 import wonderland.interview.risk.decision.domain.CreditDecisionMaker;
+import wonderland.interview.risk.decision.domain.CreditHistoryRepository;
 import wonderland.interview.risk.decision.domain.CustomerDebt;
 import wonderland.interview.risk.decision.domain.CustomerDebtRepository;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,9 @@ public class CreditDecisionServiceTest {
 
     @Mock
     private CustomerDebtRepository customerDebtRepository;
+
+    @Mock
+    private CreditHistoryRepository creditHistoryRepository;
 
     @Mock
     private CreditDecisionMaker creditDecisionMaker;
