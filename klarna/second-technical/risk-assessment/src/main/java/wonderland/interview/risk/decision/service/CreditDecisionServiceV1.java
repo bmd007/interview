@@ -3,19 +3,27 @@ package wonderland.interview.risk.decision.service;
 import com.google.common.base.Strings;
 import wonderland.interview.risk.decision.api.CreditRequestDecisionV1;
 import wonderland.interview.risk.decision.api.CreditRequestV1;
+import wonderland.interview.risk.decision.api.TransactionHistoryV1;
 import wonderland.interview.risk.decision.domain.CreditDecision;
 import wonderland.interview.risk.decision.domain.CreditDecisionMaker;
 import wonderland.interview.risk.decision.domain.CreditHistoryRepositoryImpl;
 import wonderland.interview.risk.decision.domain.CustomerDebt;
 import wonderland.interview.risk.decision.domain.CustomerDebtRepository;
+import wonderland.interview.risk.decision.domain.Transaction;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+
+import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -35,12 +43,16 @@ public class CreditDecisionServiceV1 {
     @Inject
     private CreditDecisionMaker creditDecisionMaker;
 
-    /**
-     * Handling the credit decision process.
-     *
-     * @param creditRequestV1 credit request with the amount and the customer's details
-     * @return the decision
-     */
+    @GET
+    @Path("/v1/customers/{email}/transactions")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Transaction> handleCreditRequestV1(@PathParam("email") String email, @QueryParam("reason") String reason){
+        return Optional.ofNullable(reason)
+                .map(s -> creditHistoryRepository.lookupTransactions(email, reason))
+                .orElseGet(() -> creditHistoryRepository.lookupTransactions(email));
+    }
+
     @POST
     @Path("/v1/decision")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -52,6 +64,8 @@ public class CreditDecisionServiceV1 {
         CustomerDebt customerDebt = customerDebtRepository.fetchCustomerDebtForEmail(creditRequestV1.getEmail());
 
         CreditDecision creditDecision = creditDecisionMaker.makeCreditDecision(creditRequestV1.getPurchaseAmount(), customerDebt.getDebtAmount());
+
+        creditHistoryRepository.persistTransaction(creditRequestV1.getEmail(), creditRequestV1.getPurchaseAmount(), creditDecision);
 
         if (creditDecision.isAccepted()) {
             customerDebt.increaseDebtAmount(creditRequestV1.getPurchaseAmount());

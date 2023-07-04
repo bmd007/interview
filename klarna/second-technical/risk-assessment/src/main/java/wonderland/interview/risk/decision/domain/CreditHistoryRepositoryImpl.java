@@ -34,7 +34,6 @@ public class CreditHistoryRepositoryImpl implements CreditHistoryRepository {
     public void persistTransaction(String email, int purchaseAmount, CreditDecision creditDecision) {
         TransactionHistory transactionHistory = Optional.ofNullable(transactions.get(email))
                 .orElse(TransactionHistory.empty(email));
-        transactionHistory = transactionHistory.addTransaction(purchaseAmount, creditDecision);
-        transactions.put(email, transactionHistory);
+        transactions.put(email, transactionHistory.addTransaction(purchaseAmount, creditDecision));
     }
 }
