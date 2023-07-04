@@ -5,6 +5,7 @@ import wonderland.interview.risk.decision.api.CreditRequestDecisionV1;
 import wonderland.interview.risk.decision.api.CreditRequestV1;
 import wonderland.interview.risk.decision.domain.CreditDecision;
 import wonderland.interview.risk.decision.domain.CreditDecisionMaker;
+import wonderland.interview.risk.decision.domain.CreditHistoryRepositoryImpl;
 import wonderland.interview.risk.decision.domain.CustomerDebt;
 import wonderland.interview.risk.decision.domain.CustomerDebtRepository;
 
@@ -27,6 +28,9 @@ public class CreditDecisionServiceV1 {
 
     @Inject
     private CustomerDebtRepository customerDebtRepository;
+
+    @Inject
+    private CreditHistoryRepositoryImpl creditHistoryRepository;
 
     @Inject
     private CreditDecisionMaker creditDecisionMaker;

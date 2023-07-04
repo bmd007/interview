@@ -5,9 +5,21 @@ package wonderland.interview.risk.decision.domain;
  */
 public class CreditDecisionMakerImpl implements CreditDecisionMaker {
 
+    public static final int PURCHASE_AMOUNT_LIMIT = 10;
+    public static final int DEBT_LIMIT = 100;
+
     @Override
     public CreditDecision makeCreditDecision(int purchaseAmount, int currentCustomerDebt) {
-        throw new UnsupportedOperationException("The method is not implemented!");
+        if (purchaseAmount < 0) {
+            throw new IllegalArgumentException();
+        }
+        if (purchaseAmount > PURCHASE_AMOUNT_LIMIT) {
+            return CreditDecision.MAX_AMOUNT_BREACH;
+        }
+        if (purchaseAmount + currentCustomerDebt > DEBT_LIMIT) {
+            return CreditDecision.DEBT;
+        }
+        return CreditDecision.ACCEPTED;
     }
 
 }

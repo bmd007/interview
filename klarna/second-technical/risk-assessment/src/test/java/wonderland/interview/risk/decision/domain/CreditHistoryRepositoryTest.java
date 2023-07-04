@@ -2,6 +2,7 @@ package wonderland.interview.risk.decision.domain;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class CreditHistoryRepositoryTest {
 
@@ -16,4 +17,5 @@ class CreditHistoryRepositoryTest {
     void tearDown() {
         creditHistoryRepository = null;
     }
+
 }

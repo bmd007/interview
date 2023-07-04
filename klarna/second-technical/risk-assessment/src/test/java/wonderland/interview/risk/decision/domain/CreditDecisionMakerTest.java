@@ -34,7 +34,6 @@ public class CreditDecisionMakerTest {
         assertThat(creditDecision.getReason(), is("ok"));
     }
 
-
     @Test
     public void shouldAcceptCreditRequestsUpToCustomerDebtLimit() {
         CreditDecision creditDecision = creditDecisionMaker.makeCreditDecision(10, 90);
@@ -47,6 +46,13 @@ public class CreditDecisionMakerTest {
         CreditDecision creditDecision = creditDecisionMaker.makeCreditDecision(1, 100);
         assertThat(creditDecision.isAccepted(), is(false));
         assertThat(creditDecision.getReason(), is("debt"));
+    }
+
+    @Test
+    public void shouldNotAcceptPurchasesThatWouldResultWithExceedingPurchaseLimit() {
+        CreditDecision creditDecision = creditDecisionMaker.makeCreditDecision(11, 100);
+        assertThat(creditDecision.isAccepted(), is(false));
+        assertThat(creditDecision.getReason(), is("amount"));
     }
 
 }
