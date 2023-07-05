@@ -8,7 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-public class CustomerDebtRepositoryTest {
+class CustomerDebtRepositoryTest {
 
     private CustomerDebtRepository customerDebtRepository;
 
@@ -23,7 +23,7 @@ public class CustomerDebtRepositoryTest {
     }
 
     @Test
-    public void newCustomerDebtIsZero() {
+    void newCustomerDebtIsZero() {
         CustomerDebt customerDebt = customerDebtRepository.fetchCustomerDebtForEmail("john@doe.com");
         assertThat(customerDebt, notNullValue());
         assertThat(customerDebt.getCustomerEmail(), is("john@doe.com"));
@@ -31,7 +31,7 @@ public class CustomerDebtRepositoryTest {
     }
 
     @Test
-    public void returningCustomerDebtIsNotZero() {
+    void returningCustomerDebtIsNotZero() {
         for (int i = 0; i < 5; i++) {
             CustomerDebt customerDebt = customerDebtRepository.fetchCustomerDebtForEmail("john@doe.com");
             assertThat(customerDebt, notNullValue());
@@ -41,5 +41,4 @@ public class CustomerDebtRepositoryTest {
             customerDebtRepository.persistCustomerDebt(customerDebt);
         }
     }
-
 }

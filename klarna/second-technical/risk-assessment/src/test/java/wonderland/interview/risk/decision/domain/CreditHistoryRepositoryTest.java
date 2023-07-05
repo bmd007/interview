@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
 
@@ -25,7 +24,7 @@ class CreditHistoryRepositoryTest {
     }
 
     @Test
-    void  persistingNewTransactionWhenOneAlreadyExists(){
+    void persistingNewTransactionWhenOneAlreadyExists() {
         //given
         Transaction transaction1 = new Transaction(1, CreditDecision.ACCEPTED);
         Transaction transaction2 = new Transaction(2, CreditDecision.ACCEPTED);
@@ -38,5 +37,4 @@ class CreditHistoryRepositoryTest {
         assertTrue(transactions.contains(transaction1));
         assertTrue(updatedTransactions.containsAll(List.of(transaction1, transaction2)));
     }
-
 }

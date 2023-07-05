@@ -5,7 +5,7 @@ import wonderland.interview.risk.decision.api.CreditRequestDecisionV1;
 import wonderland.interview.risk.decision.api.CreditRequestV1;
 import wonderland.interview.risk.decision.domain.CreditDecision;
 import wonderland.interview.risk.decision.domain.CreditDecisionMaker;
-import wonderland.interview.risk.decision.domain.CreditHistoryRepositoryImpl;
+import wonderland.interview.risk.decision.domain.CreditHistoryRepository;
 import wonderland.interview.risk.decision.domain.CustomerDebt;
 import wonderland.interview.risk.decision.domain.CustomerDebtRepository;
 import wonderland.interview.risk.decision.domain.Transaction;
@@ -20,8 +20,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -37,7 +36,7 @@ public class CreditDecisionServiceV1 {
     private CustomerDebtRepository customerDebtRepository;
 
     @Inject
-    private CreditHistoryRepositoryImpl creditHistoryRepository;
+    private CreditHistoryRepository creditHistoryRepository;
 
     @Inject
     private CreditDecisionMaker creditDecisionMaker;
@@ -46,7 +45,7 @@ public class CreditDecisionServiceV1 {
     @Path("/v1/customers/{email}/transactions")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Transaction> handleCreditRequestV1(@PathParam("email") String email, @QueryParam("reason") String reason){
+    public Collection<Transaction> handleCreditRequestV1(@PathParam("email") String email, @QueryParam("reason") String reason) {
         return Optional.ofNullable(reason)
                 .map(s -> creditHistoryRepository.lookupTransactions(email, reason))
                 .orElseGet(() -> creditHistoryRepository.lookupTransactions(email));

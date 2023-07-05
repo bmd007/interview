@@ -6,22 +6,21 @@ import com.google.common.collect.Streams;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TransactionHistory {
 
     private String accountOwner;
-    private List<Transaction> transactions = List.of();
+    private List<Transaction> transactions;
 
-    public static TransactionHistory empty(String email){
+    public static TransactionHistory empty(String email) {
         return new TransactionHistory(email, new ArrayList<>());
     }
 
-    public TransactionHistory addTransaction(int purchaseAmount, CreditDecision creditDecision){
+    public TransactionHistory addTransaction(int purchaseAmount, CreditDecision creditDecision) {
         Transaction newTransaction = new Transaction(purchaseAmount, creditDecision);
-        if (transactions == null){
+        if (transactions == null) {
             return new TransactionHistory(this.accountOwner, List.of(newTransaction));
         }
         List<Transaction> newTransactionHistory = Streams.concat(transactions.stream(), Stream.of(newTransaction))
