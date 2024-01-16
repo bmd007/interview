@@ -1,0 +1,3 @@
+sl:
+  baseUrl: "https://api.sl.se"
+  apiKey: ${SL_API_KEY}
