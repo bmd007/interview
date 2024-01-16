@@ -1,0 +1,8 @@
+###
+GET https://api.sl.se/api2/LineData.json?model=JourneyPatternPointOnLine&DefaultTransportModeCode=BUS&key=382c0311820444c98cf55d5307158518
+
+###
+GET https://api.sl.se/api2/LineData.json?model=stop&key=382c0311820444c98cf55d5307158518&DefaultTransportModeCode=BUS
+
+###
+GET http://localhost:8080/v1/bus/lines/most-dense/top10

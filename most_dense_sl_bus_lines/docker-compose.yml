@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+
+  sl-gateway:
+    image: bmd007/sl-gateway:latest
+    hostname: sl-gateway
+    container_name: sl-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      SL_API_KEY: 382c0311820444c98cf55d5307158518
+
+  dense-bus-lines:
+    image: bmd007/dense-bus-lines:latest
+    hostname: dense-bus-lines
+    container_name: dense-bus-lines
+    build:
+      context: ./dense-bus-lines
+      dockerfile: Dockerfile
+    ports:
+      - "80:3000"
