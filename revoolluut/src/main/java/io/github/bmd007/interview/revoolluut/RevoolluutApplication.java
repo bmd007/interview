@@ -23,19 +23,26 @@ public class RevoolluutApplication {
     BlockingQueue<LoadBalancerEvent> events = new LinkedBlockingQueue<>();
 
     Runnable eventLoop = () -> {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
+            LoadBalancerEvent loadBalancerEvent;
             try {
-                var e = events.take();
-                loadBalancables.compute(e.serviceName(),
+                loadBalancerEvent = events.take();
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
+                loadBalancables.compute(loadBalancerEvent.serviceName(),
                     (serviceName, loadBalancable) -> {
                         if (loadBalancable != null) {
-                            return loadBalancable.applyEvent(e);
+                            return loadBalancable.applyEvent(loadBalancerEvent);
                         }
                         return LoadBalancable.create(serviceName, new SelectNextStrategy.RandomPerService())
-                            .applyEvent(e);
+                            .applyEvent(loadBalancerEvent);
                     }
                 );
             } catch (Exception _) {
+                //todo log
+                events.add(loadBalancerEvent);
             }
         }
     };
