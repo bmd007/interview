@@ -1,25 +1,21 @@
 package io.github.bmd007.interview.revoolluut;
 
-import java.util.Collection;
+import lombok.Builder;
+import lombok.With;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static java.util.function.Predicate.not;
 
-public record LoadBalancable(String serviceName, Map<Integer, String> ips) {
-    public static LoadBalancable create(String name) {
-        return new LoadBalancable(name, Map.of());
-    }
-
-    private static LoadBalancable fromIps(String serviceName, Collection<String> ips) {
-        var map = new HashMap<Integer, String>();
-        int i = 0;
-        for (var ip : ips) {
-            map.put(i++, ip);
-        }
-        return new LoadBalancable(serviceName, Map.copyOf(map));
+@With
+@Builder
+public record LoadBalancable(String serviceName,
+                             SelectNextStrategy selectNextStrategy,
+                             Map<Integer, String> ips) {
+    public static LoadBalancable create(String name, SelectNextStrategy selectNextStrategy) {
+        return new LoadBalancable(name, selectNextStrategy, Map.of());
     }
 
     public LoadBalancable applyEvent(LoadBalancerEvent event) {
@@ -37,7 +33,12 @@ public record LoadBalancable(String serviceName, Map<Integer, String> ips) {
             .stream()
             .filter(not(ip::equals))
             .toList();
-        return fromIps(serviceName, remaining);
+        var map = new HashMap<Integer, String>();
+        int i = 0;
+        for (var ip1 : remaining) {
+            map.put(i++, ip1);
+        }
+        return this.withIps(Map.copyOf(map));
     }
 
     private LoadBalancable addIp(String ip) {
@@ -46,13 +47,13 @@ public record LoadBalancable(String serviceName, Map<Integer, String> ips) {
         }
         var map = new HashMap<>(ips);
         map.put(map.size(), ip);
-        return new LoadBalancable(serviceName, Map.copyOf(map));
+        return this.withIps(Map.copyOf(map));
     }
 
     public Optional<String> nextIp() {
         if (ips.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(ips.get());
+        return Optional.of(ips.get(selectNextStrategy.nextIndex(ips.size())));
     }
 }

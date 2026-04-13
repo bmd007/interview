@@ -31,7 +31,7 @@ public class RevoolluutApplication {
                         if (loadBalancable != null) {
                             return loadBalancable.applyEvent(e);
                         }
-                        return LoadBalancable.create(serviceName)
+                        return LoadBalancable.create(serviceName, new SelectNextStrategy.RandomPerService())
                             .applyEvent(e);
                     }
                 );
